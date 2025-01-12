@@ -5,27 +5,31 @@ from typing import Dict, Optional
 
 
 class Auth:
-
     def __init__(self, request_method, get_auth_headers, env):
         self._request = request_method
         self._get_auth_headers = get_auth_headers
         self.env = env
 
-    def generate_challenge(
+    async def generate_challenge(
         self,
         client_id: str,
         domain: str,
         address: str,
-        headers: Dict[str, str] = {"Content-Type": "application/x-www-form-urlencoded"},
+        headers: dict[str, str] | None = None,
         scope: str = "openid email",
         response_type: str = "code",
     ) -> Dict:
+        if headers is None:
+            headers = {"Content-Type": "application/x-www-form-urlencoded"}
         check_type("client_id", client_id, str)
         check_type("domain", domain, str)
         check_type("address", address, str)
-        if headers != {"Content-Type": "application/x-www-form-urlencoded"}:
+        if (
+            "Content-Type" not in headers
+            or headers["Content-Type"] != "application/x-www-form-urlencoded"
+        ):
             raise ValueError(
-                "Headers must be '{'Content-Type': 'application/x-www-form-urlencoded'}'"
+                "Headers must include '{'Content-Type': 'application/x-www-form-urlencoded'}'"
             )
         body = {
             "client_id": client_id,
@@ -35,7 +39,7 @@ class Auth:
             "address": address,
         }
 
-        return self._request(
+        return await self._request(
             "POST",
             "Auth",
             "/auth/web3/generate_challenge",
@@ -49,22 +53,27 @@ class Auth:
 
         return EthSigner.sign_message(message, private_key)
 
-    def submit_challenge(
+    async def submit_challenge(
         self,
         client_id: str,
         domain: str,
         state: str,
         signature: str,
-        headers: Dict[str, str] = {"Content-Type": "application/x-www-form-urlencoded"},
+        headers: dict[str, str] | None = None,
     ) -> Dict:
+        if headers is None:
+            headers = {"Content-Type": "application/x-www-form-urlencoded"}
         check_type("client_id", client_id, str)
         check_type("domain", domain, str)
         check_type("state", state, str)
         check_type("signature", signature, str)
         check_type("headers", headers, dict)
-        if headers != {"Content-Type": "application/x-www-form-urlencoded"}:
+        if (
+            "Content-Type" not in headers
+            or headers["Content-Type"] != "application/x-www-form-urlencoded"
+        ):
             raise ValueError(
-                "Headers must be '{'Content-Type': 'application/x-www-form-urlencoded'}'"
+                "Headers must include '{'Content-Type': 'application/x-www-form-urlencoded'}'"
             )
 
         form_data = {
@@ -77,7 +86,7 @@ class Auth:
 
         encoded_data = urlencode(form_data)
 
-        return self._request(
+        return await self._request(
             "POST",
             "Auth",
             "/auth/web3/submit_challenge",
@@ -86,7 +95,7 @@ class Auth:
         )
 
     # Requires client_id, domain, and private_key. Address defaults to client_id.
-    def get_token(
+    async def get_token(
         self,
         client_id: str,
         domain: str,
@@ -105,7 +114,7 @@ class Auth:
 
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
-        challenge = self.generate_challenge(
+        challenge = await self.generate_challenge(
             headers=headers,
             client_id=client_id,
             domain=domain,
@@ -122,5 +131,7 @@ class Auth:
         state = challenge["state"]
         signature = sign
 
-        submit = self.submit_challenge(client_id, domain, state, signature, headers)
+        submit = await self.submit_challenge(
+            client_id, domain, state, signature, headers
+        )
         return submit

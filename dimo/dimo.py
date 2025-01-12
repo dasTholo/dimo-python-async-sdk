@@ -8,13 +8,12 @@ from .api.valuations import Valuations
 from .graphql.identity import Identity
 from .graphql.telemetry import Telemetry
 
-from .request import Request
+from .request import AsyncRequest
 from .environments import dimo_environment
 import re
 
 
 class DIMO:
-
     def __init__(self, env="Production"):
         self.env = env
         self.urls = dimo_environment[env]
@@ -28,7 +27,7 @@ class DIMO:
         self.valuations = Valuations(self.request, self._get_auth_headers)
         self.identity = Identity(self)
         self.telemetry = Telemetry(self)
-        self._session = Request.session
+        self._session = AsyncRequest
 
     # Creates a full path for endpoints combining DIMO service, specific endpoint, and optional params
     def _get_full_path(self, service, path, params=None):
@@ -46,17 +45,18 @@ class DIMO:
         return {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
 
     # request method for HTTP requests for the REST API
-    def request(self, http_method, service, path, **kwargs):
+    async def request(self, http_method, service, path, **kwargs):
         full_path = self._get_full_path(service, path)
-        return Request(http_method, full_path)(**kwargs)
+        async_request = AsyncRequest(http_method, full_path)
+        return await async_request(**kwargs)
 
-    # query method for graphQL queries, identity and telemetry
-    def query(self, service, query, variables=None, token=None):
+    # query method for graphQL queries, identity, and telemetry
+    async def query(self, service, query, variables=None, token=None):
         headers = self._get_auth_headers(token) if token else {}
         headers["Content-Type"] = "application/json"
         headers["User-Agent"] = "dimo-python-sdk"
 
         data = {"query": query, "variables": variables or {}}
 
-        response = self.request("POST", service, "", headers=headers, data=data)
+        response = await self.request("POST", service, "", headers=headers, data=data)
         return response

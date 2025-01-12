@@ -19,11 +19,20 @@ classifiers = [
 ]
 
 dependencies = [
-    "requests>=2.30.0",
     "eth-account==0.13.4",
     "eth-utils==4.1.1",
+    "httpx>=0.28.1",
+    "orjson>=3.10.14",
+    "gql[httpx]>=3.5.0",
 ]
 
 [project.urls]
 Homepage = "https://github.com/DIMO-Network/dimo-python-sdk"
 Issues = "https://github.com/DIMO-Network/dimo-python-sdk/issues"
+
+[tool.rye]
+dev-dependencies = [
+    "aiohttp>=3.11.11",
+    "pytest>=8.3.4",
+    "pytest-asyncio>=0.25.2",
+]

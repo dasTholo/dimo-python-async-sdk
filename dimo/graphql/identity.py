@@ -3,11 +3,11 @@ class Identity:
         self.dimo = dimo_instance
 
     # Primary query method
-    def query(self, query):
-        return self.dimo.query("Identity", query)
+    async def query(self, query):
+        return await self.dimo.query("Identity", query)
 
     # Sample query - count DIMO vehicles
-    def count_dimo_vehicles(self) -> dict:
+    async def count_dimo_vehicles(self) -> dict:
         query = """
       {
           vehicles (first:10) {
@@ -15,10 +15,12 @@ class Identity:
           }
       }
       """
-        return self.dimo.query("Identity", query)
+        return await self.query(query)
 
     # Sample query - list vehicle definitions per address
-    def list_vehicle_definitions_per_address(self, address: str, limit: int) -> dict:
+    async def list_vehicle_definitions_per_address(
+        self, address: str, limit: int
+    ) -> dict:
         query = """
       query ListVehicleDefinitionsPerAddress($owner: Address!, $first: Int!) {
         vehicles(filterBy: {owner: $owner}, first: $first) {
@@ -42,10 +44,10 @@ class Identity:
       """
         variables = {"owner": address, "first": limit}
 
-        return self.dimo.query("Identity", query, variables=variables)
+        return await self.dimo.query("Identity", query, variables=variables)
 
     # Sample query - MMY per owner
-    def mmy_by_owner(self, address: str, limit: int) -> dict:
+    async def mmy_by_owner(self, address: str, limit: int) -> dict:
         query = """
     query MMYByOwner($owner: Address!, $first: Int!) {
       vehicles(filterBy: {owner: $owner}, first: $first) {
@@ -61,10 +63,10 @@ class Identity:
     """
         variables = {"owner": address, "first": limit}
 
-        return self.dimo.query("Identity", query, variables=variables)
+        return await self.dimo.query("Identity", query, variables=variables)
 
     # Sample query - tokenIDs & privileges by owner
-    def list_token_ids_privileges_by_owner(
+    async def list_token_ids_privileges_by_owner(
         self, address: str, vehicle_limit: int, privileges_limit: int
     ) -> dict:
         query = """
@@ -89,10 +91,10 @@ class Identity:
             "firstPrivileges": privileges_limit,
         }
 
-        return self.dimo.query("Identity", query, variables=variables)
+        return await self.dimo.query("Identity", query, variables=variables)
 
     # Sample query - list of tokenIDs granted to a dev from an owner
-    def list_token_ids_granted_to_dev_by_owner(
+    async def list_token_ids_granted_to_dev_by_owner(
         self, dev_address: str, owner_address: str, limit: int
     ) -> dict:
         query = """
@@ -138,7 +140,7 @@ class Identity:
         return self.dimo.query("Identity", query, variables=variables)
 
     # Sample query - MMY by TokenID
-    def mmy_by_token_id(self, token_id: int) -> dict:
+    async def mmy_by_token_id(self, token_id: int) -> dict:
         query = """
       query MMYByTokenID($tokenId: Int!) {
         vehicle (tokenId: $tokenId) {
@@ -160,10 +162,10 @@ class Identity:
       """
         variables = {"tokenId": token_id}
 
-        return self.dimo.query("Identity", query, variables=variables)
+        return await self.dimo.query("Identity", query, variables=variables)
 
     # Sample query - Rewards by owner
-    def rewards_by_owner(self, address: str) -> dict:
+    async def rewards_by_owner(self, address: str) -> dict:
         query = """
       query RewardsByOwner($owner: Address!) {
         rewards (user: $owner) {
@@ -173,10 +175,10 @@ class Identity:
       """
         variables = {"owner": address}
 
-        return self.dimo.query("Identity", query, variables=variables)
+        return await self.dimo.query("Identity", query, variables=variables)
 
     # Sample query - get rewards history by owner
-    def rewards_history_by_owner(self, address: str, limit: int) -> dict:
+    async def rewards_history_by_owner(self, address: str, limit: int) -> dict:
         query = """
       query GetVehicleDataByOwner($owner: Address!, $first: Int!) {
         vehicles (filterBy: {owner: $owner}, first: $first) {
@@ -203,4 +205,4 @@ class Identity:
       """
         variables = {"owner": address, "first": limit}
 
-        return self.dimo.query("Identity", query, variables=variables)
+        return await self.dimo.query("Identity", query, variables=variables)

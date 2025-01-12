@@ -8,7 +8,7 @@ class DeviceDefinitions:
         self._request = request_method
         self._get_auth_headers = get_auth_headers
 
-    def decode_vin(self, developer_jwt: str, country_code: str, vin: str) -> dict:
+    async def decode_vin(self, developer_jwt: str, country_code: str, vin: str) -> dict:
         check_type("developer_jwt", developer_jwt, str)
         check_type("country_code", country_code, str)
         check_type("vin", vin, str)
@@ -16,16 +16,18 @@ class DeviceDefinitions:
             "countryCode": country_code,
             "vin": vin,
         }
-        response = self._request(
+        headers = self._get_auth_headers(developer_jwt)
+        headers["Content-Type"] = "application/json"
+        response = await self._request(
             "POST",
             "DeviceDefinitions",
             "/device-definitions/decode-vin",
-            headers=self._get_auth_headers(developer_jwt),
+            headers=headers,
             data=body,
         )
         return response
 
-    def search_device_definitions(
+    async def search_device_definitions(
         self,
         query=None,
         make_slug=None,
@@ -48,7 +50,7 @@ class DeviceDefinitions:
             "page": page,
             "pageSize": page_size,
         }
-        response = self._request(
+        response = await self._request(
             "GET",
             "DeviceDefinitions",
             "/device-definitions/search",

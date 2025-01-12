@@ -8,7 +8,7 @@ class TokenExchange:
         self._request = request_method
         self._get_auth_headers = get_auth_headers
 
-    def exchange(
+    async def exchange(
         self,
         developer_jwt: str,
         privileges: list,
@@ -23,7 +23,7 @@ class TokenExchange:
             "privileges": privileges,
             "tokenId": token_id,
         }
-        response = self._request(
+        response = await self._request(
             "POST",
             "TokenExchange",
             "/v1/tokens/exchange",

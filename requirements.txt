@@ -1,4 +1,0 @@
-requests>=2.30.0
-python-dotenv
-eth-account==0.13.4
-eth-utils==4.1.1

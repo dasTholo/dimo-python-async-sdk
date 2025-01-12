@@ -1,16 +1,15 @@
-import json
-import requests
+import orjson
+from httpx import AsyncClient
 
 
-class Request:
-
-    session = requests.Session()
+class AsyncRequest:
 
     def __init__(self, http_method, url):
         self.http_method = http_method
         self.url = url
+        self.client = AsyncClient()
 
-    def __call__(self, headers=None, data=None, params=None, **kwargs):
+    async def __call__(self, headers=None, data=None, params=None, **kwargs):
         headers = headers or {}
         headers.update(kwargs.pop("headers", {}))
 
@@ -19,9 +18,10 @@ class Request:
             and isinstance(data, dict)
             and headers.get("Content-Type") == "application/json"
         ):
-            data = json.dumps(data)
+            data = orjson.dumps(data)
 
-        response = self.session.request(
+        # Perform the async request
+        response = await self.client.request(
             method=self.http_method,
             url=self.url,
             headers=headers,
@@ -34,5 +34,5 @@ class Request:
         response.raise_for_status()
 
         if response.content:
-            return response.json()
+            return orjson.loads(response.content)
         return None
