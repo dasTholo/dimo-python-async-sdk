@@ -8,7 +8,7 @@ In the future, it might be better to use the gql module for GraphQL handling.
 You can install the SDK using `pip`
 
 ```bash
-pip install pip install git+https://github.com/dasTholo/dimo-python-async-sdk.git
+pip install git+https://github.com/dasTholo/dimo-python-async-sdk.git
 ```
 
 ## Unit Testing
