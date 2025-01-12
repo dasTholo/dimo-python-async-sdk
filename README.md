@@ -1,11 +1,14 @@
-# DIMO Python Developer SDK
+# DIMO Python Developer Async SDK
+
+WIP: Rewrite from requests to HTTPX only.  
+In the future, it might be better to use the gql module for GraphQL handling.
 
 ## Installation
 
 You can install the SDK using `pip`
 
 ```bash
-pip install dimo-python-sdk
+pip install pip install git+https://github.com/dasTholo/dimo-python-async-sdk.git
 ```
 
 ## Unit Testing
@@ -59,18 +62,18 @@ To get authenticated as a developer, you must have already obtained a [Developer
 The SDK offers 3 basic functions that maps to the steps listed in [Authentication](https://docs.dimo.org/developer-platform/getting-started/developer-guide/authentication): `generate_challenge`, `sign_challenge`, and `submit_challenge`. You can use them accordingly depending on how you build your application.
 
 ```python
-    challenge = dimo.auth.generate_challenge(
+    challenge = await dimo.auth.generate_challenge(
         client_id = '<client_id>',
         domain = '<domain>',
         address = '<address>'
     )
 
-    signature = dimo.auth.sign_challenge(
+    signature = await dimo.auth.sign_challenge(
         message = challenge['challenge'],
         private_key = '<private_key>'
     )
 
-    tokens = dimo.auth.submit_challenge(
+    tokens = await dimo.auth.submit_challenge(
         client_id = '<client_id>',
         domain = '<domain>',
         state = challenge['state'],
@@ -83,7 +86,7 @@ The SDK offers 3 basic functions that maps to the steps listed in [Authenticatio
 As mentioned earlier, this is the streamlined function call to directly get the `developer_jwt`. The `address` field in challenge generation is omitted since it is essentially the `client_id` of your application per Developer License:
 
 ```python
-auth_header = dimo.auth.get_token(
+auth_header = await dimo.auth.get_token(
     client_id = '<client_id>',
     domain = '<domain>',
     private_key = '<private_key>'
@@ -99,7 +102,7 @@ The SDK uses the [requests](https://requests.readthedocs.io/en/latest/) library 
 
 ```python
 def decode_vin():
-    device_makes = dimo.device_definitions.decode_vin(
+    device_makes = await dimo.device_definitions.decode_vin(
         developer_jwt = dev_jwt,
         country_code = "USA",
         vin = "<VIN>"
@@ -112,7 +115,7 @@ def decode_vin():
 For query parameters, simply feed in an input that matches with the expected query parameters:
 
 ```python
-dimo.device_definitions.search_device_definitions(
+await dimo.device_definitions.search_device_definitions(
     query = "Lexus gx 2023"
 )
 ```
@@ -128,7 +131,7 @@ Typically, any endpoints that uses a NFT `tokenId` in path parameters will requi
 
 ```python
 
-get_vehicle_jwt = dimo.token_exchange.exchange(
+get_vehicle_jwt = await dimo.token_exchange.exchange(
     developer_jwt = dev_jwt, 
     # The Developer JWT you received using either the three step function calls, or the .get_token() shortcut 
     privileges=[1, 3, 4, 5],
@@ -143,7 +146,7 @@ Once you have the privilege token, you can pipe it through to corresponding endp
 
 ```python
 def my_trips():
-    trip_data = dimo.trips.trips(
+    trip_data = await dimo.trips.trips(
         vehicle_jwt=vehicle_jwt, 
         token_id=<token_id>
         )
@@ -160,7 +163,7 @@ The GraphQL entry points are designed almost identical to the REST API entry poi
 
 ```python
 
-telemetry_data = dimo.telemetry.query(
+telemetry_data = await dimo.telemetry.query(
     vehicle_jwt=vehicle_jwt,
     query= """
         query {
@@ -183,7 +186,7 @@ my_query = """
     }
     """
 
-total_network_vehicles = dimo.identity.query(query=my_query)
+total_network_vehicles = await dimo.identity.query(query=my_query)
 ```
 
 ## How to Contribute to the SDK
